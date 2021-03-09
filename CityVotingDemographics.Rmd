@@ -2,7 +2,10 @@
 title: "CalgaryVoting"
 author: "L.Doyle"
 date: "07/03/2021"
-output: html_document
+output: 
+  html_document: 
+  keep_md: true
+ 
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +28,7 @@ ComDemo <- read.csv("./Civic_Census_by_Community__Age_and_Gender.csv")
 ```
 
 ### Civic Census by Community, Age, Gender from 1996 to 2019  
-[link] (https://data.calgary.ca/Demographics/Civic-Census-by-Community-Age-and-Gender/vsk6-ghca)
+[link](https://data.calgary.ca/Demographics/Civic-Census-by-Community-Age-and-Gender/vsk6-ghca)
 ```{r census}
 GenderReport <- ComDemo %>%
   group_by(YEAR) %>%
@@ -40,7 +43,7 @@ ComDemo <- ComDemo %>% filter(YEAR != "1996")
 ```
 
 ### 2017 Calgary Civic Election Results.  
-[link] (https://data.calgary.ca/Government/2017-Official-Election-Results-by-Voting-Station/atsy-3a4w).  
+[link](https://data.calgary.ca/Government/2017-Official-Election-Results-by-Voting-Station/atsy-3a4w).  
 
 #### Election Data Cleaning  
 Election results include school board trustees we only care about city councillors and Mayor for now also remove unwanted columns.
@@ -51,7 +54,7 @@ Elect <- Elect %>%
 ```
 
 #### Voting Station Communities  
-Election results are reported by voting station but do not have communities associated with the voting stations.  Demographic data is reported by community. To join these two datasets I need to get the communities that the voting stations are in. I did this by loading "voting station location" csv [link](https://data.calgary.ca/Government/Voting-Stations-Effective-October-16-2017-/ps5q-maip) and "community boundaries" shapefile [link] (https://data.calgary.ca/Base-Maps/Community-Boundaries/surr-xmvs) (downloaded from the city of Calgary) into QGIS and creating an intersection layer which includes a community column in the voting stations table. I then exported that layer and imported it into R. 
+Election results are reported by voting station but do not have communities associated with the voting stations.  Demographic data is reported by community. To join these two datasets I need to get the communities that the voting stations are in. I did this by loading "voting station location" csv [link](https://data.calgary.ca/Government/Voting-Stations-Effective-October-16-2017-/ps5q-maip) and "community boundaries" shapefile [link](https://data.calgary.ca/Base-Maps/Community-Boundaries/surr-xmvs) (downloaded from the city of Calgary) into QGIS and creating an intersection layer which includes a community column in the voting stations table. I then exported that layer and imported it into R. 
 ```{r StationsWCommunity}
 stationsWcomm <- read.csv("./VotingStationsWCommunity.csv")
 
