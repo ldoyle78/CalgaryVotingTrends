@@ -10,25 +10,32 @@ output:
 
 
 ## Calgary Voting and Demographics  
-This is a work in progress and very much still in it's early stages.  
+<span style = "color: red;"> **This is a work in progress and very much still in it's early stages.**  </span>
 
-This is an exploratory analysis looking at voting trends initially in Calgary's Ward 11. In the first stage I want to investigate if Ward 11 is homoegenous in it's voting patterns and visualize any differences between communities. 
+### Stage 1
+This is an exploratory analysis looking at voting trends of the 2017 YYC Municipal Elections initially in Calgary's Ward 11. In the first stage I want to investigate if Ward 11 is homoegenous in it's voting patterns and visualize any differences between communities. 
 
 Next steps include:
+
 * comparisons across wards  
 * comparisons between 2017 and previous elections  
 * compare vote distribution for mayoral candidates and how correlatable they are with city councillor vote distributions. 
 
-### Stage 2
-I would like to investigate the relationship between voting patterns and demographics of a community and possibly comparison between municipal voting patterns and provincial and federal voting patterns.
+### Stage 2 - TBD
+I would like to investigate the relationship between:
 
-Data was downloaded from the City of Calgary's Open Data website. 
+* voting patterns and demographics of a community 
+* comparison between municipal voting patterns and provincial and federal voting patterns.
 
 
 ### Assumptions and uncertainties
 Taking community demographic data and comparing it to election results from that community will not be a perfect match since multiple communities will feed into a single polling station and certain demographics are likely over-represented in voters but it will make a good first approximation.I would also like to do some statistical analysis on any perceived trends and relationships to see if they are significant.
 
-### Loading data
+
+#### Loading Data
+2017 Calgary Civivc Election Results were downloaded from the City of Calgary's Open Data Website.
+[link](https://data.calgary.ca/Government/2017-Official-Election-Results-by-Voting-Station/atsy-3a4w). 
+
 ```r
 library(tidyverse)
 # load data
@@ -38,15 +45,10 @@ ComDemo <- read.csv("./Civic_Census_by_Community__Age_and_Gender.csv")
 
 
 
-```r
-ComDemo <- ComDemo %>% filter(YEAR != "1996")
-```
 
-### 2017 Calgary Civic Election Results.  
-[link](https://data.calgary.ca/Government/2017-Official-Election-Results-by-Voting-Station/atsy-3a4w).  
+## Election Data Wrangling  
+Election results include school board trustees. At this time I am only interested in city councillors and Mayorso filter for those offices. Also remove unwanted columns.
 
-#### Election Data Cleaning  
-Election results include school board trustees we only care about city councillors and Mayor for now also remove unwanted columns.
 
 ```r
 Elect <- Elect %>% 
@@ -54,8 +56,10 @@ Elect <- Elect %>%
   select(-Voting.Station.ID)
 ```
 
-#### Voting Station Communities  
-Election results are reported by voting station but do not have communities associated with the voting stations.  Demographic data is reported by community. To join these two datasets I need to get the communities that the voting stations are in. I did this by loading "voting station location" csv [link](https://data.calgary.ca/Government/Voting-Stations-Effective-October-16-2017-/ps5q-maip) and "community boundaries" shapefile [link](https://data.calgary.ca/Base-Maps/Community-Boundaries/surr-xmvs) (downloaded from the city of Calgary) into QGIS and creating an intersection layer which includes a community column in the voting stations table. I then exported that layer and imported it into R. 
+#### Getting Voting Station Communities w QGIS & Selecting relevant columns
+
+Election results are reported by voting station but do not have communities associated with the voting stations.  Demographic data is reported by community. To join these two datasets I need to get the communities that the voting stations are in. I did this by loading "voting station location" csv [link](https://data.calgary.ca/Government/Voting-Stations-Effective-October-16-2017-/ps5q-maip) and "community boundaries" shapefile [link](https://data.calgary.ca/Base-Maps/Community-Boundaries/surr-xmvs) (downloaded from the city of Calgary) into QGIS and creating an intersection layer which includes a community column in the voting stations table. I then exported that layer and imported it into my RMarkdown file. 
+
 
 ```r
 stationsWcomm <- read.csv("./VotingStationsWCommunity.csv")
@@ -66,7 +70,12 @@ stationsWcomm <- stationsWcomm %>%
 
 # Join stationsWcomm df w the Elect df, match by name rather than stationID as some stations have multiple ID
 ElectComm <- Elect %>% left_join(stationsWcomm, by = c("Voting.Station.Name" = "NAME"))
+```
 
+#### Determine how many votes are not associated with a community
+
+
+```r
 # investigate the voting stations that don't correspond to a community & how many votes are associated w them
 NoCommunity <- subset(ElectComm, is.na(comm_code))
 sum(NoCommunity$Votes) # votes not associated w a community
@@ -83,24 +92,11 @@ sum(Elect$Votes) # total votes;
 ```
 ## [1] 752708
 ```
-22694/752708  = 3.0%.  3% of votes will not be accounted for if I remove these rows.  
-
-#### How are the unaccounted for votes classified
-Determine what type of voting stations the votes with no associated community are from.
-
-```r
-table(NoCommunity$Voting.Station.Type)  
-```
-
-```
-## 
-##    Advance   Hospital    Mail-in    Regular    Special Travelling 
-##        172        344         86         16       1025         86
-```
+Votes with no community = 22,694; total votes = 752,708.  22694/752708  = 3.0%.  3% of votes will not be accounted for if I remove these rows.  
 
 
-## Votes not assigned to a voting station  
-Try to make some prediction about the demographic of the unassigned votes and investigate to make sure there is nothing unusual about the votes before filtering them from the dataset
+## Investigate the Unaccounted for votes
+Determine what type of voting stations the votes with no associated community are from.Try to make some prediction about the demographic of the unassigned votes and investigate to make sure there is nothing unusual about the votes before filtering them from the dataset
 
 
 ```r
@@ -123,8 +119,10 @@ NoCommunityType
 ## 5 Special               5193      23
 ## 6 Travelling             471       2
 ```
-This table indicates that 23% of the NoCommunity votes are from a "special" Voting.Station.Type which appears to be the designation given for seniors residence. These votes could be reasonably assigned to +65 demographic.
-**I need to do something with the below table to compare it to overall voting habits and make sure it all checks out. Maybe create visuals for each ward comparing unclassified votes to in-person votes to look for descrepencies**
+This table indicates that 23% of the NoCommunity votes are from a "special" Voting.Station.Type which appears to be the designation given for seniors residence. These votes could be reasonably assigned to +65 demographic in future analyses.
+
+
+<span style = "color: red;">**I need to do something with the below table to compare it to overall voting habits and make sure it all checks out. Maybe create visuals for each ward comparing unclassified votes to in-person votes to look for descrepencies**</span>
 
 ```r
 # Investigate there is nothing unusual about these votes
@@ -162,7 +160,9 @@ UnaccountedVotes <- NoCommunity %>%
 CommunityVotes <- subset(ElectComm, !is.na(comm_code))
 ```
 ## Ward 11
-I started by looking at distribution of votes for Ward 11 City Councillor. Analysis indicates that 20% of Ward11 votes were cast in advance and are thus not associated with a voting station. I will only be looking at votes associated with a voting station so that I can compare them with community demographics in phase two. **I should come back and look at the vote distribution in advance voters to see if it matches in-person voting trends if possible.**
+Look at distribution of votes for Ward 11 City Councillor. Analysis indicates that 20% of Ward11 votes were cast in advance and are thus not associated with a voting station. I will only be looking at votes associated with a voting station so that I can compare them with community demographics in Stage Two. 
+
+<span style = "color: red;">**I should come back and look at the vote distribution in advance voters to see if it matches in-person voting trends if possible.**</span>
 
 ```r
 # create a df of just Ward11 
@@ -230,8 +230,15 @@ gWard11Col
 ![](Ward11VotingTrends_files/figure-html/Ward11-1.png)<!-- -->
 
 
-Next steps: Take a look at those communities and overlay demographics maybe add Mayor bars.
-compare to previous election, compare to provincial and federal elections, compare to special voters and advance voters, demographics from federal census?
+Next steps: 
+
+* Take a look at communities and overlay demographics from census. 
+* Compare voting trends for Councillor with those for Mayor in Ward 11.
+* Compare to previous elections with 2017 results 
+* compare to provincial and federal elections 
+* compare to special voters and advance voters.
+
+## Beginning Stage Two Rough Work
 
 ### Civic Census by Community, Age, Gender from 1996 to 2019  
 [link](https://data.calgary.ca/Demographics/Civic-Census-by-Community-Age-and-Gender/vsk6-ghca)
@@ -259,6 +266,9 @@ GenderReport <- ComDemo %>%
 ## 10  2019 641938  638369
 ```
 
-The above table indicates that there was no gender reporting in the 1996 Civic Census Therefore filter out 1996.
+The above table indicates that there was no gender reporting in the 1996 Civic Census, filter out 1996.
 
-To be continued...
+
+```r
+ComDemo <- ComDemo %>% filter(YEAR != "1996")
+```
