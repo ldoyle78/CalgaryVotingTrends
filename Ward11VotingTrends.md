@@ -12,12 +12,23 @@ output:
 ## Calgary Voting and Demographics  
 This is a work in progress and very much still in it's early stages.  
 
-This is an exploratory analysis to explore relationshsips between demographics of a community and their voting tendencies.  I will begin by looking for patterns in age and gender distribution compared to election results from the 2017 Civic election.  After that I may look to add additional data like provincial and federal voting habits, housing income, single family versus multi unit housing, historical civic voting habits, advance voters trends or voters from seniors residence, etc.  Data was downloaded from the City of Calgary's Open Data website. 
+This is an exploratory analysis looking at voting trends initially in Calgary's Ward 11. In the first stage I want to investigate if Ward 11 is homoegenous in it's voting patterns and visualize any differences between communities. 
+
+Next steps include:
+* comparisons across wards  
+* comparisons between 2017 and previous elections  
+* compare vote distribution for mayoral candidates and how correlatable they are with city councillor vote distributions. 
+
+### Stage 2
+I would like to investigate the relationship between voting patterns and demographics of a community and possibly comparison between municipal voting patterns and provincial and federal voting patterns.
+
+Data was downloaded from the City of Calgary's Open Data website. 
+
 
 ### Assumptions and uncertainties
 Taking community demographic data and comparing it to election results from that community will not be a perfect match since multiple communities will feed into a single polling station and certain demographics are likely over-represented in voters but it will make a good first approximation.I would also like to do some statistical analysis on any perceived trends and relationships to see if they are significant.
 
-
+### Loading data
 ```r
 library(tidyverse)
 # load data
@@ -25,33 +36,6 @@ Elect <- read.csv("./2017_Official_Election_Results_by_Voting_Station.csv")
 ComDemo <- read.csv("./Civic_Census_by_Community__Age_and_Gender.csv")
 ```
 
-### Civic Census by Community, Age, Gender from 1996 to 2019  
-[link](https://data.calgary.ca/Demographics/Civic-Census-by-Community-Age-and-Gender/vsk6-ghca)
-
-```r
-GenderReport <- ComDemo %>%
-  group_by(YEAR) %>%
-  summarize(males = sum(MALES), females = sum(FEMALES)) %>%
-  print()
-```
-
-```
-## # A tibble: 10 x 3
-##     YEAR  males females
-##  * <int>  <int>   <int>
-##  1  1996 767059       0
-##  2  1999 422699  419689
-##  3  2001 439514  437005
-##  4  2004 467530  465965
-##  5  2006 497449  494310
-##  6  2009 537403  528052
-##  7  2011 547782  543154
-##  8  2014 594904  600290
-##  9  2016 621021  614150
-## 10  2019 641938  638369
-```
-
-The above table indicates that there was no gender reporting in the 1996 Civic Census, filter out 1996.
 
 
 ```r
@@ -248,3 +232,33 @@ gWard11Col
 
 Next steps: Take a look at those communities and overlay demographics maybe add Mayor bars.
 compare to previous election, compare to provincial and federal elections, compare to special voters and advance voters, demographics from federal census?
+
+### Civic Census by Community, Age, Gender from 1996 to 2019  
+[link](https://data.calgary.ca/Demographics/Civic-Census-by-Community-Age-and-Gender/vsk6-ghca)
+
+```r
+GenderReport <- ComDemo %>%
+  group_by(YEAR) %>%
+  summarize(males = sum(MALES), females = sum(FEMALES)) %>%
+  print()
+```
+
+```
+## # A tibble: 10 x 3
+##     YEAR  males females
+##  * <int>  <int>   <int>
+##  1  1996 767059       0
+##  2  1999 422699  419689
+##  3  2001 439514  437005
+##  4  2004 467530  465965
+##  5  2006 497449  494310
+##  6  2009 537403  528052
+##  7  2011 547782  543154
+##  8  2014 594904  600290
+##  9  2016 621021  614150
+## 10  2019 641938  638369
+```
+
+The above table indicates that there was no gender reporting in the 1996 Civic Census Therefore filter out 1996.
+
+To be continued...
